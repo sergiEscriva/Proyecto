@@ -4,14 +4,22 @@ import Enums.TipoMotor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Strava {
+public class Strava implements Serializable {
+	@Serial
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger LOGGER = LogManager.getLogger();
 	static final GuardarEstado SAVE = new GuardarEstado();
 
@@ -25,33 +33,47 @@ public class Strava {
 		imprimirInicio();
 		cargarDatos();
 		Scanner sc = new Scanner(System.in);
+		int opcion = 0;
+		do {
 
 
-		try {
-			int opcion = 2;
+			try {
+				opcion = sc.nextInt();
 
-			switch (opcion) {
-				case 1:
-					crearConductor(sc);
-					break;
-				case 2:
-					crearVehiculo(sc);
-					break;
-				case 3:
+				switch (opcion) {
+					case 1:
+						crearConductor(sc);
+						break;
+					case 2:
+						crearVehiculo(sc);
+						break;
+					case 3:
+						eliminarConductor(sc);
+						break;
+					default:
+						System.out.println("Opcion no valida");
+						opcion = 0;
 
+				}
+				SAVE.guardarDatos();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			SAVE.guardarDatos();
-		} catch (Exception e) {
-			LOGGER.error("error en el main");
-		}
+		} while (opcion >= 1 && opcion <= 3);
 	}
 
+
 	private static void cargarDatos() {
+		File file = new File("src\\FicherosGuardados\\EstadoStrava.dat");
+		if (file.length() == 0) {
+			System.err.println("No hay datos que cargar");
+			return;
+		}
 		try {
 			SAVE.cargarDatos();
 		} catch (IOException | ClassNotFoundException e) {
-			System.err.println("Error al cargar los datos");
-			LOGGER.error("");
+			System.err.println("Error de entrada/salida al cargar los datos");
+			LOGGER.error("Error de entrada/salida: ", e);
 		}
 
 		listaConductores = SAVE.obtenerConductores();
@@ -66,13 +88,14 @@ public class Strava {
 				"  ,--'---:---`--, /  |  _     |     `| |      |      `| |                    | |    \\\n" +
 				" ==(o)-----(o)==J    `(o)-------(o)=   `(o)------(o)'   `--(o)(o)--------------(o)--'  \n" +
 				"`````````````````````````````````````````````````````````````````````````````````````\n");
-		System.out.println("Bienvenido a ClasesJava.Strava Automation\n" +
-				"1. Crear ClasesJava.Conductor\n" +
+		System.out.println("Bienvenido a Strava Automation\n" +
+				"1. Crear Conductor\n" +
 				"2. Crear Vechiculo\n" +
-				"3. Crear ClasesJava.Ruta");
+				"3. Crear Ruta");
 	}
 
 	private static void crearConductor(Scanner sc) {
+		sc.nextLine();
 		String nombre;
 		String id;
 		try {
@@ -95,6 +118,7 @@ public class Strava {
 	}
 
 	private static void crearVehiculo(Scanner sc) {
+		sc.nextLine();
 		String matricula;
 		String marca;
 		String modelo;
@@ -128,6 +152,7 @@ public class Strava {
 	}
 
 	private static boolean comprobarId(String palabra) {
+
 		Pattern pattern = Pattern.compile("^[0-9]{3}[A-Z]]$");
 		Matcher matcher = pattern.matcher(palabra);
 		return matcher.matches();
@@ -203,4 +228,19 @@ public class Strava {
 		return numPlazas;
 	}
 
+	private static void eliminarConductor(Scanner sc){
+		System.out.println("Inserte id del Conductor");
+		System.err.println("SE ELIMINARAN LOS COCHES ASOCIADOS AL USUARIO");
+		sc.nextLine();
+		String id = sc.nextLine();
+		Iterator<Conductor> iterator = SAVE..iterator();
+		while (iterator.hasNext()) {
+			Conductor conductor = iterator.next();
+			if (conductor.getId().equalsIgnoreCase(id)){
+				iterator.remove();
+				listaConductores.remove(conductor);
+				SAVE.eliminarConductor(conductor);
+			}
+		}
+	}
 }
