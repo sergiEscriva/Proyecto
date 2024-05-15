@@ -1,22 +1,23 @@
 package ClasesJava;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Conductor {
+public class Conductor implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private String nombre;
-	private int id;
+	private String id;
 	private ArrayList<Vehiculo> listaVehiculos;
 	private boolean disponible;
 
 	public Conductor() {
 	}
 
-	public Conductor(String nombre, int id, ArrayList<Vehiculo> listaVehiculos, boolean disponible) {
+	public Conductor(String nombre, String id) {
 		this.nombre = nombre;
 		this.id = id;
-		this.listaVehiculos = listaVehiculos;
-		this.disponible = disponible;
 	}
 
 	public String getNombre() {
@@ -27,11 +28,11 @@ public class Conductor {
 		this.nombre = nombre;
 	}
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

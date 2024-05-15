@@ -31,7 +31,7 @@ nivel de registro del sistema de registro de Log4j -->
 
         <!-- La definición del logger root le dice a Log4j que use esa configuración cuando no se encuentre una
         configuración dedicada -->
-        <Root level="info">
+        <Root level="error">
             <AppenderRef ref="LogToFile"/>
             <AppenderRef ref="LogToConsole"/>
         </Root>

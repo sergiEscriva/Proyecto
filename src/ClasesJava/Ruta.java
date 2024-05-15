@@ -1,8 +1,11 @@
 package ClasesJava;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Ruta {
+public class Ruta  implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private String origen;
 	private String destino;
 	private double duracion;
