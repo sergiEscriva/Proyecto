@@ -4,7 +4,7 @@ import Enums.TipoMotor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 public class Strava {
 	private static final Logger LOGGER = LogManager.getLogger();
+	static final GuardarEstado SAVE = new GuardarEstado();
 
 	private static List<Conductor> listaConductores = new ArrayList<>();
 	private static List<Vehiculo> listaVehiculos = new ArrayList<>();
@@ -22,19 +23,40 @@ public class Strava {
 
 	public static void main(String[] args) {
 		imprimirInicio();
+		cargarDatos();
 		Scanner sc = new Scanner(System.in);
-		int opcion = 2;
 
-		switch (opcion) {
-			case 1:
-				crearConductor(sc);
-				break;
-			case 2:
-				crearVehiculo(sc);
-				break;
-			case 3:
-				crearRuta();
+
+		try {
+			int opcion = 2;
+
+			switch (opcion) {
+				case 1:
+					crearConductor(sc);
+					break;
+				case 2:
+					crearVehiculo(sc);
+					break;
+				case 3:
+
+			}
+			SAVE.guardarDatos();
+		} catch (Exception e) {
+			LOGGER.error("error en el main");
 		}
+	}
+
+	private static void cargarDatos() {
+		try {
+			SAVE.cargarDatos();
+		} catch (IOException | ClassNotFoundException e) {
+			System.err.println("Error al cargar los datos");
+			LOGGER.error("");
+		}
+
+		listaConductores = SAVE.obtenerConductores();
+		listaVehiculos = SAVE.obtenerVehiculos();
+		listaRutas = SAVE.obtenerRutas();
 	}
 
 	private static void imprimirInicio() {
@@ -61,7 +83,9 @@ public class Strava {
 						"Formato: 111A");
 				id = sc.nextLine();
 			} while (comprobarId(id));
-			listaConductores.add(new Conductor(nombre, id));
+			Conductor conductor = new Conductor(nombre, id);
+			listaConductores.add(conductor);
+			SAVE.agregarConductor(conductor);
 
 		} catch (Exception e) {
 			LOGGER.error("Error en la creacion del Conductor");
@@ -94,8 +118,9 @@ public class Strava {
 			double km = obtenerKm(sc);
 
 			TipoMotor tipoMotor = seleccionarMotor(sc);
-
-			listaVehiculos.add(new Vehiculo(matricula,marca,modelo,numPlazas,km,tipoMotor));
+			Vehiculo vehiculo = new Vehiculo(matricula, marca, modelo, numPlazas, km, tipoMotor);
+			listaVehiculos.add(vehiculo);
+			SAVE.agregarVehiculo(vehiculo);
 
 		} catch (Exception e) {
 			LOGGER.error("Fallo al crear el vehiculo");

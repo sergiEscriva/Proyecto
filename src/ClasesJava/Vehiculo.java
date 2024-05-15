@@ -3,10 +3,12 @@ package ClasesJava;
 import Enums.EstadoVehiculo;
 import Enums.TipoMotor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class Vehiculo implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String matricula;
