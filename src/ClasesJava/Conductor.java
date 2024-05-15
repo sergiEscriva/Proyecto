@@ -64,6 +64,8 @@ public class Conductor {
 		return Objects.hash(nombre, id, listaVehiculos, disponible);
 	}
 
+	
+
 	@Override
 	public String toString() {
 		return "ClasesJava.Conductor{" +
