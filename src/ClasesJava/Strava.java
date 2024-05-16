@@ -64,7 +64,8 @@ public class Strava implements Serializable {
 					case 5:
 						crearRuta(sc);
 						break;
-
+					case 6:
+						creacionPartes(sc);
 					default:
 						System.out.println("Opcion no valida");
 						opcion = 0;
@@ -72,9 +73,10 @@ public class Strava implements Serializable {
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error("Error en en el desarrollo del programa");
 			}
 		} while (opcion >= 1 && opcion <= 7);
+		sc.close();
 		guardarEstado();
 
 	}
@@ -289,8 +291,6 @@ public class Strava implements Serializable {
 		for (Vehiculo vehiculo : listaVehiculos) {
 			System.out.println(" | " + vehiculo + " | ");
 		}
-
-
 	}
 
 	private static Conductor obtenerConductor(Scanner sc) {
@@ -327,6 +327,7 @@ public class Strava implements Serializable {
 
 		Ruta ruta = new Ruta(origen, destino, distancia, vehiculo, conductor);
 		listaRutas.add(ruta);
+		actualizarKmVehiculo(vehiculo, distancia);
 	}
 
 	private static Ciudades obtenerUbicacion(Scanner sc, Ciudades[] ciudades) {
@@ -404,6 +405,10 @@ public class Strava implements Serializable {
 		return vehiculo;
 	}
 
+	private static void actualizarKmVehiculo(Vehiculo vehiculo, double distancia) {
+		vehiculo.setKm(vehiculo.getKm() + distancia);
+	}
+
 	public static void guardarEstado() {
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(RUTA))) {
 			oos.writeObject(listaConductores);
@@ -427,5 +432,16 @@ public class Strava implements Serializable {
 			i.printStackTrace();
 			return;
 		}
+	}
+
+	private static void creacionPartes(Scanner sc){
+		System.out.println("De que Conductor desea crear el ");
+		Conductor conductor = obtenerConductorVinculado(sc);
+
+		System.out.println("Seleccione el vehiculo del conductor");
+		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
+
+
+
 	}
 }

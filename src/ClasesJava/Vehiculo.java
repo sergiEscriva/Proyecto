@@ -1,6 +1,5 @@
 package ClasesJava;
 
-import Enums.EstadoVehiculo;
 import Enums.TipoMotor;
 
 import java.io.Serial;
@@ -17,7 +16,7 @@ public class Vehiculo implements Serializable, Comparable<Vehiculo> {
 	private int plazas;
 	private double km;
 	private TipoMotor tipoMotor;
-	private EstadoVehiculo estadoVehiculo;
+
 
 	public Vehiculo() {
 	}
@@ -30,21 +29,13 @@ public class Vehiculo implements Serializable, Comparable<Vehiculo> {
 		this.km = km;
 		this.tipoMotor = tipoMotor;
 	}
-
+	
 	public String getMarca() {
 		return marca;
 	}
 
 	public void setMarca(String marca) {
 		this.marca = marca;
-	}
-
-	public EstadoVehiculo getEstadoVehiculo() {
-		return estadoVehiculo;
-	}
-
-	public void setEstadoVehiculo(EstadoVehiculo estadoVehiculo) {
-		this.estadoVehiculo = estadoVehiculo;
 	}
 
 	public String getMatricula() {
