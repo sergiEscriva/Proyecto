@@ -1,22 +1,22 @@
 package ClasesJava;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Conductor {
+public class Conductor implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private String nombre;
-	private int id;
-	private ArrayList<Vehiculo> listaVehiculos;
+	private String id;
 	private boolean disponible;
 
 	public Conductor() {
 	}
 
-	public Conductor(String nombre, int id, ArrayList<Vehiculo> listaVehiculos, boolean disponible) {
+	public Conductor(String nombre, String id) {
 		this.nombre = nombre;
 		this.id = id;
-		this.listaVehiculos = listaVehiculos;
-		this.disponible = disponible;
 	}
 
 	public String getNombre() {
@@ -27,20 +27,12 @@ public class Conductor {
 		this.nombre = nombre;
 	}
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
-	}
-
-	public ArrayList<Vehiculo> getListaVehiculos() {
-		return listaVehiculos;
-	}
-
-	public void setListaVehiculos(ArrayList<Vehiculo> listaVehiculos) {
-		this.listaVehiculos = listaVehiculos;
 	}
 
 	public boolean isDisponible() {
@@ -56,23 +48,19 @@ public class Conductor {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Conductor conductor = (Conductor) o;
-		return id == conductor.id && disponible == conductor.disponible && Objects.equals(nombre, conductor.nombre) && Objects.equals(listaVehiculos, conductor.listaVehiculos);
+		return disponible == conductor.disponible && Objects.equals(nombre, conductor.nombre) && Objects.equals(id, conductor.id);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(nombre, id, listaVehiculos, disponible);
+		return Objects.hash(nombre, id, disponible);
 	}
-
-
 
 	@Override
 	public String toString() {
-		return "ClasesJava.Conductor{" +
-				"nombre='" + nombre + '\'' +
-				", id=" + id +
-				", listaVehiculos=" + listaVehiculos +
-				", disponible=" + disponible +
-				'}';
+		return
+				"Nombre: " + nombre + '\'' +
+				", Id=" + id +
+				", disponible=" + disponible;
 	}
 }

@@ -2,7 +2,7 @@ package Enums;
 
 public enum EstadoVehiculo {
 	DISPONIBLE("Disponible","El vehiculo esta disponible"),
-	EN_RUTA("En ruta", "El vehiculo se encuentra en una ruta"),
+	//EN_RUTA("En ruta", "El vehiculo se encuentra en una ruta"),
 	MANTENIMIENTO("En mantenimiento", "El vehiculo se encuentra en revision o reparandose");
 
 
