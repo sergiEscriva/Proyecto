@@ -37,7 +37,8 @@ public class Strava implements Serializable {
 						"2. Crear Vechiculo\n" +
 						"3. Eliminar Conductor\n" +
 						"4. Lista Conuctores\n" +
-						"5. Crear Ruta");
+						"5. Crear Ruta\n" +
+						"6. Creacion Partes");
 
 				opcion = sc.nextInt();
 
@@ -506,9 +507,9 @@ public class Strava implements Serializable {
 					default:
 						System.out.println("Opción no válida. Por favor, intente de nuevo.");
 				}
+				sc.nextLine();
 			} catch (InputMismatchException e) {
-				System.out.println("Entrada no válida. Por favor, introduzca un número.");
-				sc.next();
+				LOGGER.debug("Entrada no valida");
 			}
 		} while (tipoMantenimientoAselecionar == null);
 		return tipoMantenimientoAselecionar;
