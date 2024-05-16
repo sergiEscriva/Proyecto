@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Vehiculo implements Serializable {
+public class Vehiculo implements Serializable, Comparable<Vehiculo>{
 	@Serial
 	private static final long serialVersionUID = 1L;
 
@@ -109,5 +109,10 @@ public class Vehiculo implements Serializable {
 				", km=" + km +
 				", tipoMotos=" + tipoMotor +
 				'}';
+	}
+
+	@Override
+	public int compareTo(Vehiculo o) {
+		return Double.compare(this.km, o.getKm());
 	}
 }
