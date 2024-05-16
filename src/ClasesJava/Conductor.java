@@ -1,10 +1,12 @@
 package ClasesJava;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Conductor implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String nombre;

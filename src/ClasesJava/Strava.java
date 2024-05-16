@@ -5,8 +5,7 @@ import Enums.TipoMotor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +15,7 @@ public class Strava implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOGGER = LogManager.getLogger();
-
+	private static final String RUTA = "src\\FicherosGuardados\\EstadoStrava.dat";
 	private static List<Conductor> listaConductores = new ArrayList<>();
 	private static List<Vehiculo> listaVehiculos = new ArrayList<>();
 	private static List<Ruta> listaRutas = new ArrayList<>();
@@ -28,7 +27,7 @@ public class Strava implements Serializable {
 	public static void main(String[] args) {
 		imprimirDibujo();
 		Scanner sc = new Scanner(System.in);
-
+		cargarEstado();
 		int opcion = 0;
 		do {
 			try {
@@ -76,6 +75,7 @@ public class Strava implements Serializable {
 				e.printStackTrace();
 			}
 		} while (opcion >= 1 && opcion <= 7);
+		guardarEstado();
 
 	}
 
@@ -100,7 +100,7 @@ public class Strava implements Serializable {
 				System.out.print("Inserte el id\n" +
 						"Formato: 111A");
 				id = sc.nextLine();
-			} while (comprobarId(id));
+			} while (comprobarId(id) || idUsado(id));
 			Conductor conductor = new Conductor(nombre, id);
 			listaConductores.add(conductor);
 			return Boolean.TRUE;
@@ -110,6 +110,16 @@ public class Strava implements Serializable {
 			System.out.println(ANSI_RESET);
 		}
 		return Boolean.FALSE;
+	}
+
+	private static boolean idUsado(String id) {
+		for (Conductor conductor : listaConductores) {
+			if (conductor.getId().equalsIgnoreCase(id)) {
+				System.out.println("id ya en uso");
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static boolean crearVehiculo(Scanner sc) {
@@ -315,7 +325,7 @@ public class Strava implements Serializable {
 		System.out.println("Seleccione el vehiculo del conductor");
 		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
 
-		Ruta ruta = new Ruta(origen,destino,distancia,vehiculo,conductor);
+		Ruta ruta = new Ruta(origen, destino, distancia, vehiculo, conductor);
 		listaRutas.add(ruta);
 	}
 
@@ -392,5 +402,30 @@ public class Strava implements Serializable {
 			}
 		}
 		return vehiculo;
+	}
+
+	public static void guardarEstado() {
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(RUTA))) {
+			oos.writeObject(listaConductores);
+			oos.writeObject(listaVehiculos);
+			oos.writeObject(listaRutas);
+			oos.writeObject(listaAsignada);
+			System.out.println("El estado de la aplicación se ha guardado en EstadoStrava.dat");
+		} catch (IOException i) {
+			i.printStackTrace();
+		}
+	}
+
+	public static void cargarEstado() {
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(RUTA))) {
+
+			listaConductores = (List<Conductor>) in.readObject();
+			listaVehiculos = (List<Vehiculo>) in.readObject();
+			listaRutas = (List<Ruta>) in.readObject();
+			listaAsignada = (HashMap<Conductor, PriorityQueue<Vehiculo>>) in.readObject();
+		} catch (IOException | ClassNotFoundException i) {
+			i.printStackTrace();
+			return;
+		}
 	}
 }
