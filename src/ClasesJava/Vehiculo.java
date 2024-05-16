@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Vehiculo implements Serializable, Comparable<Vehiculo>{
+public class Vehiculo implements Serializable, Comparable<Vehiculo> {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
@@ -102,13 +102,12 @@ public class Vehiculo implements Serializable, Comparable<Vehiculo>{
 
 	@Override
 	public String toString() {
-		return "ClasesJava.Vehiculo{" +
-				"matricula='" + matricula + '\'' +
-				", modelo='" + modelo + '\'' +
-				", plazas=" + plazas +
-				", km=" + km +
-				", tipoMotos=" + tipoMotor +
-				'}';
+		return
+				"Matricula =" + matricula  +
+						", Modelo=" + modelo +
+						", Plazas=" + plazas +
+						", Km totales=" + km +
+						", Tipo motor=" + tipoMotor + "\n";
 	}
 
 	@Override

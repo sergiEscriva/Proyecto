@@ -1,5 +1,7 @@
 package ClasesJava;
 
+import Enums.Ciudades;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
@@ -8,8 +10,8 @@ public class Ruta  implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private String origen;
-	private String destino;
+	private Ciudades origen;
+	private Ciudades destino;
 	private double duracion;
 	private double distancia;
 	private Vehiculo vehiculo;
@@ -18,28 +20,27 @@ public class Ruta  implements Serializable {
 	public Ruta() {
 	}
 
-	public Ruta(String origen, String destino, double duracion, double distancia, Vehiculo vehiculo, Conductor conductor) {
+	public Ruta(Ciudades origen, Ciudades destino, double duracion, Vehiculo vehiculo, Conductor conductor) {
 		this.origen = origen;
 		this.destino = destino;
 		this.duracion = duracion;
-		this.distancia = distancia;
 		this.vehiculo = vehiculo;
 		this.conductor = conductor;
 	}
 
-	public String getOrigen() {
+	public Ciudades getOrigen() {
 		return origen;
 	}
 
-	public void setOrigen(String origen) {
+	public void setOrigen(Ciudades origen) {
 		this.origen = origen;
 	}
 
-	public String getDestino() {
+	public Ciudades getDestino() {
 		return destino;
 	}
 
-	public void setDestino(String destino) {
+	public void setDestino(Ciudades destino) {
 		this.destino = destino;
 	}
 

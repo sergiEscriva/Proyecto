@@ -1,5 +1,6 @@
 package ClasesJava;
 
+import Enums.Ciudades;
 import Enums.TipoMotor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +36,8 @@ public class Strava implements Serializable {
 						"1. Crear Conductor\n" +
 						"2. Crear Vechiculo\n" +
 						"3. Eliminar Conductor\n" +
-						"4. Lista Conuctores");
+						"4. Lista Conuctores\n" +
+						"5. Crear Ruta");
 
 				opcion = sc.nextInt();
 
@@ -49,7 +51,7 @@ public class Strava implements Serializable {
 						break;
 					case 2:
 						if (crearVehiculo(sc)) {
-							System.out.println("Vehiculo creado correctamente");
+							System.out.println("Todos los vehiculos creados correctamente");
 						} else {
 							System.out.println("No se ha podido crear el vehiculo");
 						}
@@ -61,11 +63,9 @@ public class Strava implements Serializable {
 						mostrarConductores();
 						break;
 					case 5:
-						mostrarVehiculos();
+						crearRuta(sc);
 						break;
-					case 6:
-						crearRuta();
-						break;
+
 					default:
 						System.out.println("Opcion no valida");
 						opcion = 0;
@@ -75,7 +75,7 @@ public class Strava implements Serializable {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} while (opcion >= 1 && opcion <= 6);
+		} while (opcion >= 1 && opcion <= 7);
 
 	}
 
@@ -154,16 +154,16 @@ public class Strava implements Serializable {
 				TipoMotor tipoMotor = seleccionarMotor(sc);
 				Vehiculo vehiculo = new Vehiculo(matricula, marca, modelo, numPlazas, km, tipoMotor);
 				vehiculos.add(vehiculo);
-				System.out.println("Vehiculo insertado correctamente");
+				System.out.println("Vehiculo insertado correctamente" + ANSI_RESET);
 
 				listaVehiculos.add(vehiculo);
 
 			} catch (Exception e) {
-				LOGGER.error("Fallo al crear el vehiculo");
+				LOGGER.error("Fallo al crear el vehiculo" + ANSI_RESET);
 			}
 		}
 		listaAsignada.put(conductor, vehiculos);
-		return Boolean.FALSE;
+		return Boolean.TRUE;
 	}
 
 	private static boolean comprobarId(String palabra) {
@@ -220,7 +220,7 @@ public class Strava implements Serializable {
 			} else {
 				System.out.println("Por favor, introduzca un número válido para los kilómetros.");
 				validKm = false;
-				sc.next(); // Descarta la entrada incorrecta
+				sc.next();
 			}
 		} while (!validKm);
 		return km;
@@ -267,7 +267,7 @@ public class Strava implements Serializable {
 		}
 		for (Conductor conductor : listaConductores) {
 
-			System.out.print(" | " + conductor + " | ");
+			System.out.print(" | " + conductor + " |\n");
 		}
 	}
 
@@ -294,7 +294,103 @@ public class Strava implements Serializable {
 		return null;
 	}
 
-	private static void crearRuta(Scanner sc){
+	private static void crearRuta(Scanner sc) {
+		if (listaVehiculos.isEmpty() || listaConductores.isEmpty()) {
+			System.out.println("Debe haber vehiculos y conductores para crear una ruta");
+			return;
+		}
+		Ciudades[] ciudades = Ciudades.values();
+		System.out.println(ANSI_BLUE + Arrays.toString(ciudades) + ANSI_RESET + "\n" + "Escriba sin '_'");
+		System.out.println("Inserte ubicacion de origen");
+		Ciudades origen = obtenerUbicacion(sc, ciudades);
 
+		System.out.println("Inserte ubicacion de destino");
+		Ciudades destino = obtenerUbicacion(sc, ciudades);
+
+		double distancia = CalculadoraDistancia.calcularDistancia(origen.getLatitud(), origen.getLongitud(), destino.getLatitud(), destino.getLongitud());
+
+		System.out.print("Seleccione conductor:");
+		Conductor conductor = obtenerConductorVinculado(sc);
+
+		System.out.println("Seleccione el vehiculo del conductor");
+		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
+
+		Ruta ruta = new Ruta(origen,destino,distancia,vehiculo,conductor);
+		listaRutas.add(ruta);
+	}
+
+	private static Ciudades obtenerUbicacion(Scanner sc, Ciudades[] ciudades) {
+
+		Ciudades ciudadEncontrada = null;
+
+		while (ciudadEncontrada == null) {
+			String nombreCiudad = sc.nextLine();
+			for (Ciudades ciudad : ciudades) {
+				if (ciudad.getNombreCiudad().equalsIgnoreCase(nombreCiudad)) {
+					ciudadEncontrada = ciudad;
+					break;
+				}
+			}
+			if (ciudadEncontrada == null) {
+				System.out.println("la ciudad no se ha encontrado\n" +
+						"Vuelva a intentarlo");
+
+			}
+
+		}
+		return ciudadEncontrada;
+	}
+
+	private static Conductor obtenerConductorVinculado(Scanner sc) {
+		sc.nextLine();
+
+		Conductor conductor = null;
+		while (conductor == null) {
+			System.out.println("Inserte el id del conductor");
+			mostrarConductores();
+			String id = sc.nextLine();
+			for (Map.Entry<Conductor, PriorityQueue<Vehiculo>> lista : listaAsignada.entrySet()) {
+				if (lista.getKey().getId().equalsIgnoreCase(id)) {
+					System.out.println("Conductor seleccionado: " + lista.getKey().getNombre());
+					conductor = lista.getKey();
+					return conductor;
+				}
+			}
+			if (conductor == null) {
+				System.out.println("Conductor no encontrado vuelva a intentarlo");
+			}
+		}
+		return null;
+	}
+
+	private static Vehiculo obtenerVehiculoVinculado(Scanner sc, Conductor conductor) {
+		Vehiculo vehiculo = null;
+		while (vehiculo == null) {
+			for (Map.Entry<Conductor, PriorityQueue<Vehiculo>> lista : listaAsignada.entrySet()) {
+
+				if (lista.getKey().equals(conductor)) {
+
+					System.out.println(" | " + lista.getValue().toString() + " | ");
+					System.out.println("Seleccione el vehiculo por la matricula");
+					String matricula = sc.nextLine();
+
+					for (Vehiculo vehiculoABuscar : lista.getValue()) {
+						if (vehiculoABuscar.getMatricula().equalsIgnoreCase(matricula)) {
+							vehiculo = vehiculoABuscar;
+							break;
+						}
+					}
+					if (vehiculo == null) {
+						System.out.println("Vehiculo no encontrado, por favor, vuelva a intentarlo.");
+					} else {
+						break;
+					}
+
+				} else {
+					System.out.println("Conductor no valido, reinicie la aplicacion");
+				}
+			}
+		}
+		return vehiculo;
 	}
 }
