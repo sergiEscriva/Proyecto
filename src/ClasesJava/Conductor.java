@@ -52,13 +52,13 @@ public class Conductor implements Serializable {
 		this.disponible = disponible;
 	}
 
-	/*@Override
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Conductor conductor = (Conductor) o;
 		return id == conductor.id && disponible == conductor.disponible && Objects.equals(nombre, conductor.nombre) && Objects.equals(listaVehiculos, conductor.listaVehiculos);
-	}*/
+	}
 
 	@Override
 	public int hashCode() {

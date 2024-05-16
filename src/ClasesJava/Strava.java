@@ -8,11 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +17,6 @@ public class Strava implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOGGER = LogManager.getLogger();
-	static final GuardarEstado SAVE = new GuardarEstado();
 
 	private static List<Conductor> listaConductores = new ArrayList<>();
 	private static List<Vehiculo> listaVehiculos = new ArrayList<>();
@@ -29,72 +24,71 @@ public class Strava implements Serializable {
 	private static final String ANSI_BLUE = "\u001B[34m";
 	private static final String ANSI_RESET = "\u001B[0m";
 
+	private static HashMap<Conductor, PriorityQueue<Vehiculo>> listaAsignada = new HashMap<>();
+
 	public static void main(String[] args) {
-		imprimirInicio();
-		cargarDatos();
+		imprimirDibujo();
 		Scanner sc = new Scanner(System.in);
+
 		int opcion = 0;
 		do {
-
-
 			try {
+				System.out.println("Bienvenido a Strava Automation\n" +
+						"1. Crear Conductor\n" +
+						"2. Crear Vechiculo\n" +
+						"3. Eliminar Conductor\n" +
+						"4. Lista Conuctores");
+
 				opcion = sc.nextInt();
 
 				switch (opcion) {
 					case 1:
-						crearConductor(sc);
+						if (crearConductor(sc)) {
+							System.out.println("Conductor creado correctamene");
+						} else {
+							System.out.println("No se ha podido crear el concuctor");
+						}
 						break;
 					case 2:
-						crearVehiculo(sc);
+						if (crearVehiculo(sc)) {
+							System.out.println("Vehiculo creado correctamente");
+						} else {
+							System.out.println("No se ha podido crear el vehiculo");
+						}
 						break;
 					case 3:
 						eliminarConductor(sc);
+						break;
+					case 4:
+						mostrarConductores();
+						break;
+					case 5:
+						mostrarVehiculos();
 						break;
 					default:
 						System.out.println("Opcion no valida");
 						opcion = 0;
 
 				}
-				SAVE.guardarDatos();
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} while (opcion >= 1 && opcion <= 3);
+		} while (opcion >= 1 && opcion <= 6);
+
 	}
 
-
-	private static void cargarDatos() {
-		File file = new File("src\\FicherosGuardados\\EstadoStrava.dat");
-		if (file.length() == 0) {
-			System.err.println("No hay datos que cargar");
-			return;
-		}
-		try {
-			SAVE.cargarDatos();
-		} catch (IOException | ClassNotFoundException e) {
-			System.err.println("Error de entrada/salida al cargar los datos");
-			LOGGER.error("Error de entrada/salida: ", e);
-		}
-
-		listaConductores = SAVE.obtenerConductores();
-		listaVehiculos = SAVE.obtenerVehiculos();
-		listaRutas = SAVE.obtenerRutas();
-	}
-
-	private static void imprimirInicio() {
+	private static void imprimirDibujo() {
 		System.out.println("                                                         _________________________   \n" +
 				"                    /\\\\      _____          _____       |   |     |     |    | |  \\  \n" +
 				"     ,-----,       /  \\\\____/__|__\\_    ___/__|__\\___   |___|_____|_____|____|_|___\\ \n" +
 				"  ,--'---:---`--, /  |  _     |     `| |      |      `| |                    | |    \\\n" +
 				" ==(o)-----(o)==J    `(o)-------(o)=   `(o)------(o)'   `--(o)(o)--------------(o)--'  \n" +
 				"`````````````````````````````````````````````````````````````````````````````````````\n");
-		System.out.println("Bienvenido a Strava Automation\n" +
-				"1. Crear Conductor\n" +
-				"2. Crear Vechiculo\n" +
-				"3. Crear Ruta");
+
 	}
 
-	private static void crearConductor(Scanner sc) {
+	private static boolean crearConductor(Scanner sc) {
 		sc.nextLine();
 		String nombre;
 		String id;
@@ -108,16 +102,16 @@ public class Strava implements Serializable {
 			} while (comprobarId(id));
 			Conductor conductor = new Conductor(nombre, id);
 			listaConductores.add(conductor);
-			SAVE.agregarConductor(conductor);
-
+			return Boolean.TRUE;
 		} catch (Exception e) {
 			LOGGER.error("Error en la creacion del Conductor");
 		} finally {
 			System.out.println(ANSI_RESET);
 		}
+		return Boolean.FALSE;
 	}
 
-	private static void crearVehiculo(Scanner sc) {
+	private static boolean crearVehiculo(Scanner sc) {
 		sc.nextLine();
 		String matricula;
 		String marca;
@@ -144,11 +138,12 @@ public class Strava implements Serializable {
 			TipoMotor tipoMotor = seleccionarMotor(sc);
 			Vehiculo vehiculo = new Vehiculo(matricula, marca, modelo, numPlazas, km, tipoMotor);
 			listaVehiculos.add(vehiculo);
-			SAVE.agregarVehiculo(vehiculo);
+			return Boolean.TRUE;
 
 		} catch (Exception e) {
 			LOGGER.error("Fallo al crear el vehiculo");
 		}
+		return Boolean.FALSE;
 	}
 
 	private static boolean comprobarId(String palabra) {
@@ -228,19 +223,41 @@ public class Strava implements Serializable {
 		return numPlazas;
 	}
 
-	private static void eliminarConductor(Scanner sc){
+	private static void eliminarConductor(Scanner sc) {
+		int contador = 0;
 		System.out.println("Inserte id del Conductor");
 		System.err.println("SE ELIMINARAN LOS COCHES ASOCIADOS AL USUARIO");
 		sc.nextLine();
 		String id = sc.nextLine();
-		Iterator<Conductor> iterator = SAVE..iterator();
-		while (iterator.hasNext()) {
-			Conductor conductor = iterator.next();
-			if (conductor.getId().equalsIgnoreCase(id)){
-				iterator.remove();
-				listaConductores.remove(conductor);
-				SAVE.eliminarConductor(conductor);
+		for (int i = 0; i < listaConductores.size(); i++) {
+			if (listaConductores.get(i).getId().equalsIgnoreCase(id)) {
+				listaConductores.remove(listaConductores.get(i));
+				contador++;
 			}
+		}
+		if (contador != 0) {
+			System.out.println("Se han eliminado " + contador + " conductor/es");
+		}
+	}
+
+	private static void mostrarConductores() {
+		if (listaConductores.isEmpty()) {
+			System.out.println("No existen conductores\n");
+			return;
+		}
+		for (Conductor conductor : listaConductores) {
+
+			System.out.print(" | " + conductor + " | ");
+		}
+	}
+
+	private static void mostrarVehiculos(){
+		if (listaVehiculos.isEmpty()){
+			System.out.println("So existen vehiculos\n");
+			return;
+		}
+		for (Vehiculo vehiculo : listaVehiculos){
+			System.out.println( " | " + vehiculo + " | ");
 		}
 	}
 }
