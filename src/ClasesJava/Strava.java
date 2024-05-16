@@ -1,6 +1,7 @@
 package ClasesJava;
 
 import Enums.Ciudades;
+import Enums.TipoMantenimiento;
 import Enums.TipoMotor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -434,14 +435,82 @@ public class Strava implements Serializable {
 		}
 	}
 
-	private static void creacionPartes(Scanner sc){
+	private static void creacionPartes(Scanner sc) {
 		System.out.println("De que Conductor desea crear el ");
 		Conductor conductor = obtenerConductorVinculado(sc);
 
 		System.out.println("Seleccione el vehiculo del conductor");
 		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
 
+		File carpetaUsuario = new File("src\\CarpetasPartes\\" + conductor.getId());
 
+		if (carpetaUsuario.exists() && carpetaUsuario.isDirectory()) {
+			System.out.println("La carpeta existe");
+		} else {
+			System.out.println("La carpeta no existe, se procede a crearla");
+			if (carpetaUsuario.mkdir()) {
+				System.out.println("Carpeta creada con exito");
+			} else {
+				System.out.println("La carpeta no se ha podido crear");
+			}
+		}
+		generarParte(conductor, vehiculo, sc, carpetaUsuario);
+	}
 
+	private static void generarParte(Conductor conductor, Vehiculo vehiculo, Scanner sc, File carpeta) {
+		int numeroFicheros = carpeta.listFiles().length;
+		String rutaFichero = "src\\CarpetasPartes\\" + conductor.getId() + "\\parte.csv";
+
+		System.out.println("Tipo de mantenimiento:");
+		TipoMantenimiento tipoMantenimiento = obtenerTipoMantenimiento(sc);
+
+		System.out.println("A continuacion describa el probrema que problema del vehiculo");
+		String parte = sc.nextLine();
+
+		System.out.print("Coste total:");
+		double coste = sc.nextDouble();
+		numeroFicheros++;
+		try (PrintWriter writer = new PrintWriter("src\\CarpetasPartes\\" + conductor.getId() + "\\parte"+ numeroFicheros +".csv")) {
+			writer.println("Matricula,Marca,Modelo,TipoMantenimiento,Parte,Coste");
+
+			writer.println(vehiculo.getMatricula() + ";" +
+					vehiculo.getMarca() + ";" +
+					vehiculo.getModelo() + ";"+
+					tipoMantenimiento + ";" +
+					parte + ";" +
+					coste);
+
+		} catch (FileNotFoundException e) {
+			LOGGER.error("Error al crear el fichero");
+		}
+	}
+
+	private static TipoMantenimiento obtenerTipoMantenimiento(Scanner sc) {
+		TipoMantenimiento tipoMantenimientoAselecionar = null;
+		do {
+			try {
+				System.out.println("1. Revision\n" +
+						"2. Reparacion\n" +
+						"3. Siniestro\n");
+				int opcion = sc.nextInt();
+				switch (opcion) {
+					case 1:
+						tipoMantenimientoAselecionar = TipoMantenimiento.REVISION;
+						break;
+					case 2:
+						tipoMantenimientoAselecionar = TipoMantenimiento.REPARACION;
+						break;
+					case 3:
+						tipoMantenimientoAselecionar = TipoMantenimiento.SINIESTRO;
+						break;
+					default:
+						System.out.println("Opción no válida. Por favor, intente de nuevo.");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("Entrada no válida. Por favor, introduzca un número.");
+				sc.next();
+			}
+		} while (tipoMantenimientoAselecionar == null);
+		return tipoMantenimientoAselecionar;
 	}
 }

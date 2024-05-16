@@ -29,7 +29,7 @@ public class Vehiculo implements Serializable, Comparable<Vehiculo> {
 		this.km = km;
 		this.tipoMotor = tipoMotor;
 	}
-	
+
 	public String getMarca() {
 		return marca;
 	}
