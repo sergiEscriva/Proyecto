@@ -1,15 +1,16 @@
 package ClasesJava;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class Conductor implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String nombre;
 	private String id;
-	private boolean disponible;
+	ParteMantenimiento parteMantenimiento;
 
 	public Conductor() {
 	}
@@ -35,32 +36,23 @@ public class Conductor implements Serializable {
 		this.id = id;
 	}
 
-	public boolean isDisponible() {
-		return disponible;
-	}
-
-	public void setDisponible(boolean disponible) {
-		this.disponible = disponible;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Conductor conductor = (Conductor) o;
-		return disponible == conductor.disponible && Objects.equals(nombre, conductor.nombre) && Objects.equals(id, conductor.id);
+		return Objects.equals(nombre, conductor.nombre) && Objects.equals(id, conductor.id);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(nombre, id, disponible);
+		return Objects.hash(nombre, id);
 	}
 
 	@Override
 	public String toString() {
 		return
-				"Nombre: " + nombre + '\'' +
-				", Id=" + id +
-				", disponible=" + disponible;
+				"Nombre: " + nombre +
+						", Id: " + id ;
 	}
 }

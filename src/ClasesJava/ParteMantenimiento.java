@@ -4,20 +4,20 @@ import Enums.TipoMantenimiento;
 
 import java.util.Objects;
 
-public class Mantenimiento {
+public class ParteMantenimiento {
 	private double costo;
 	private Vehiculo vehiculo;
 	private TipoMantenimiento tipoMantenimiento;
 	private String parte;
 
-	public Mantenimiento(double costo, Vehiculo vehiculo, TipoMantenimiento tipoMantenimiento, String parte) {
+	public ParteMantenimiento(double costo, Vehiculo vehiculo, TipoMantenimiento tipoMantenimiento, String parte) {
 		this.costo = costo;
 		this.vehiculo = vehiculo;
 		this.tipoMantenimiento = tipoMantenimiento;
 		this.parte = parte;
 	}
 
-	public Mantenimiento() {
+	public ParteMantenimiento() {
 	}
 
 	public double getCosto() {
@@ -56,7 +56,7 @@ public class Mantenimiento {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		Mantenimiento that = (Mantenimiento) o;
+		ParteMantenimiento that = (ParteMantenimiento) o;
 		return Double.compare(costo, that.costo) == 0 && Objects.equals(vehiculo, that.vehiculo) && tipoMantenimiento == that.tipoMantenimiento && Objects.equals(parte, that.parte);
 	}
 
@@ -67,7 +67,7 @@ public class Mantenimiento {
 
 	@Override
 	public String toString() {
-		return "ClasesJava.Mantenimiento{" +
+		return "ClasesJava.ParteMantenimiento{" +
 				"costo=" + costo +
 				", vehiculo=" + vehiculo +
 				", tipoMantenimiento=" + tipoMantenimiento +

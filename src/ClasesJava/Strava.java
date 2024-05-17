@@ -1,12 +1,12 @@
 package ClasesJava;
 
 import Enums.Ciudades;
+import Enums.TipoMantenimiento;
 import Enums.TipoMotor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +16,7 @@ public class Strava implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger LOGGER = LogManager.getLogger();
-
+	private static final String RUTA = "src\\FicherosGuardados\\EstadoStrava.dat";
 	private static List<Conductor> listaConductores = new ArrayList<>();
 	private static List<Vehiculo> listaVehiculos = new ArrayList<>();
 	private static List<Ruta> listaRutas = new ArrayList<>();
@@ -28,7 +28,7 @@ public class Strava implements Serializable {
 	public static void main(String[] args) {
 		imprimirDibujo();
 		Scanner sc = new Scanner(System.in);
-
+		cargarEstado();
 		int opcion = 0;
 		do {
 			try {
@@ -37,7 +37,9 @@ public class Strava implements Serializable {
 						"2. Crear Vechiculo\n" +
 						"3. Eliminar Conductor\n" +
 						"4. Lista Conuctores\n" +
-						"5. Crear Ruta");
+						"5. Crear Ruta\n" +
+						"6. Creacion Partes\n" +
+						"7. Mostrar Rutas");
 
 				opcion = sc.nextInt();
 
@@ -65,7 +67,12 @@ public class Strava implements Serializable {
 					case 5:
 						crearRuta(sc);
 						break;
-
+					case 6:
+						creacionPartes(sc);
+						break;
+					case 7:
+						mostrarRutas();
+						break;
 					default:
 						System.out.println("Opcion no valida");
 						opcion = 0;
@@ -73,9 +80,11 @@ public class Strava implements Serializable {
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.error("Error en en el desarrollo del programa");
 			}
 		} while (opcion >= 1 && opcion <= 7);
+		sc.close();
+		guardarEstado();
 
 	}
 
@@ -100,7 +109,7 @@ public class Strava implements Serializable {
 				System.out.print("Inserte el id\n" +
 						"Formato: 111A");
 				id = sc.nextLine();
-			} while (comprobarId(id));
+			} while (comprobarId(id) || idUsado(id));
 			Conductor conductor = new Conductor(nombre, id);
 			listaConductores.add(conductor);
 			return Boolean.TRUE;
@@ -110,6 +119,16 @@ public class Strava implements Serializable {
 			System.out.println(ANSI_RESET);
 		}
 		return Boolean.FALSE;
+	}
+
+	private static boolean idUsado(String id) {
+		for (Conductor conductor : listaConductores) {
+			if (conductor.getId().equalsIgnoreCase(id)) {
+				System.out.println("id ya en uso");
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static boolean crearVehiculo(Scanner sc) {
@@ -213,7 +232,7 @@ public class Strava implements Serializable {
 		double km = 0;
 		boolean validKm;
 		do {
-			System.out.println("Inserte Kilometros totales");
+			System.out.print("Inserte Kilometros totales: ");
 			if (sc.hasNextDouble()) {
 				km = sc.nextDouble();
 				validKm = true;
@@ -271,18 +290,6 @@ public class Strava implements Serializable {
 		}
 	}
 
-	private static void mostrarVehiculos() {
-		if (listaVehiculos.isEmpty()) {
-			System.out.println("So existen vehiculos\n");
-			return;
-		}
-		for (Vehiculo vehiculo : listaVehiculos) {
-			System.out.println(" | " + vehiculo + " | ");
-		}
-
-
-	}
-
 	private static Conductor obtenerConductor(Scanner sc) {
 		System.out.print("Inserte el id del conductor: ");
 		String id = sc.nextLine();
@@ -299,6 +306,13 @@ public class Strava implements Serializable {
 			System.out.println("Debe haber vehiculos y conductores para crear una ruta");
 			return;
 		}
+
+		System.out.print("Seleccione conductor:");
+		Conductor conductor = obtenerConductorVinculado(sc);
+
+		System.out.println("Seleccione el vehiculo del conductor");
+		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
+
 		Ciudades[] ciudades = Ciudades.values();
 		System.out.println(ANSI_BLUE + Arrays.toString(ciudades) + ANSI_RESET + "\n" + "Escriba sin '_'");
 		System.out.println("Inserte ubicacion de origen");
@@ -307,16 +321,11 @@ public class Strava implements Serializable {
 		System.out.println("Inserte ubicacion de destino");
 		Ciudades destino = obtenerUbicacion(sc, ciudades);
 
-		double distancia = CalculadoraDistancia.calcularDistancia(origen.getLatitud(), origen.getLongitud(), destino.getLatitud(), destino.getLongitud());
+		double distancia = Math.round(CalculadoraDistancia.calcularDistancia(origen.getLatitud(), origen.getLongitud(), destino.getLatitud(), destino.getLongitud()));
 
-		System.out.print("Seleccione conductor:");
-		Conductor conductor = obtenerConductorVinculado(sc);
-
-		System.out.println("Seleccione el vehiculo del conductor");
-		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
-
-		Ruta ruta = new Ruta(origen,destino,distancia,vehiculo,conductor);
+		Ruta ruta = new Ruta(origen, destino, distancia, vehiculo, conductor);
 		listaRutas.add(ruta);
+		actualizarKmVehiculo(vehiculo, distancia);
 	}
 
 	private static Ciudades obtenerUbicacion(Scanner sc, Ciudades[] ciudades) {
@@ -392,5 +401,117 @@ public class Strava implements Serializable {
 			}
 		}
 		return vehiculo;
+	}
+
+	private static void actualizarKmVehiculo(Vehiculo vehiculo, double distancia) {
+		vehiculo.setKm(vehiculo.getKm() + distancia);
+	}
+
+	public static void guardarEstado() {
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(RUTA))) {
+			oos.writeObject(listaConductores);
+			oos.writeObject(listaVehiculos);
+			oos.writeObject(listaRutas);
+			oos.writeObject(listaAsignada);
+			System.out.println("El estado de la aplicación se ha guardado en EstadoStrava.dat");
+		} catch (IOException i) {
+			i.printStackTrace();
+		}
+	}
+
+	public static void cargarEstado() {
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(RUTA))) {
+
+			listaConductores = (List<Conductor>) in.readObject();
+			listaVehiculos = (List<Vehiculo>) in.readObject();
+			listaRutas = (List<Ruta>) in.readObject();
+			listaAsignada = (HashMap<Conductor, PriorityQueue<Vehiculo>>) in.readObject();
+		} catch (IOException | ClassNotFoundException i) {
+			i.printStackTrace();
+			return;
+		}
+	}
+
+	private static void creacionPartes(Scanner sc) {
+		System.out.println("De que Conductor desea crear el ");
+		Conductor conductor = obtenerConductorVinculado(sc);
+
+		System.out.println("Seleccione el vehiculo del conductor");
+		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
+
+		File carpetaUsuario = new File("src\\CarpetasPartes\\" + conductor.getId());
+
+		if (carpetaUsuario.exists() && carpetaUsuario.isDirectory()) {
+			System.out.println("La carpeta existe");
+		} else {
+			System.out.println("La carpeta no existe, se procede a crearla");
+			if (carpetaUsuario.mkdir()) {
+				System.out.println("Carpeta creada con exito");
+			} else {
+				System.out.println("La carpeta no se ha podido crear");
+			}
+		}
+		generarParte(conductor, vehiculo, sc, carpetaUsuario);
+	}
+
+	private static void generarParte(Conductor conductor, Vehiculo vehiculo, Scanner sc, File carpeta) {
+		int numeroFicheros = carpeta.listFiles().length;
+		String rutaFichero = "src\\CarpetasPartes\\" + conductor.getId() + "\\parte.csv";
+
+		System.out.println("Tipo de mantenimiento:");
+		TipoMantenimiento tipoMantenimiento = obtenerTipoMantenimiento(sc);
+
+		System.out.println("A continuacion describa el probrema que problema del vehiculo");
+		String parte = sc.nextLine();
+
+		System.out.print("Coste total:");
+		double coste = sc.nextDouble();
+		numeroFicheros++;
+		try (PrintWriter writer = new PrintWriter("src\\CarpetasPartes\\" + conductor.getId() + "\\parte" + numeroFicheros + ".csv")) {
+			writer.println("Matricula,Marca,Modelo,TipoMantenimiento,Parte,Coste");
+
+			writer.println(vehiculo.getMatricula() + ";" +
+					vehiculo.getMarca() + ";" +
+					vehiculo.getModelo() + ";" +
+					tipoMantenimiento + ";" +
+					parte + ";" +
+					coste);
+
+		} catch (FileNotFoundException e) {
+			LOGGER.error("Error al crear el fichero");
+		}
+	}
+
+	private static TipoMantenimiento obtenerTipoMantenimiento(Scanner sc) {
+		TipoMantenimiento tipoMantenimientoAselecionar = null;
+		do {
+			try {
+				System.out.println("1. Revision\n" +
+						"2. Reparacion\n" +
+						"3. Siniestro\n");
+				int opcion = sc.nextInt();
+				switch (opcion) {
+					case 1:
+						tipoMantenimientoAselecionar = TipoMantenimiento.REVISION;
+						break;
+					case 2:
+						tipoMantenimientoAselecionar = TipoMantenimiento.REPARACION;
+						break;
+					case 3:
+						tipoMantenimientoAselecionar = TipoMantenimiento.SINIESTRO;
+						break;
+					default:
+						System.out.println("Opción no válida. Por favor, intente de nuevo.");
+				}
+				sc.nextLine();
+			} catch (InputMismatchException e) {
+				LOGGER.debug("Entrada no valida");
+			}
+		} while (tipoMantenimientoAselecionar == null);
+		return tipoMantenimientoAselecionar;
+	}
+
+	private static void mostrarRutas(){
+		System.out.println(listaRutas);
 	}
 }
