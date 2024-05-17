@@ -12,7 +12,6 @@ public class Ruta  implements Serializable {
 
 	private Ciudades origen;
 	private Ciudades destino;
-	private double duracion;
 	private double distancia;
 	private Vehiculo vehiculo;
 	private Conductor conductor;
@@ -20,10 +19,10 @@ public class Ruta  implements Serializable {
 	public Ruta() {
 	}
 
-	public Ruta(Ciudades origen, Ciudades destino, double duracion, Vehiculo vehiculo, Conductor conductor) {
+	public Ruta(Ciudades origen, Ciudades destino, double distancia, Vehiculo vehiculo, Conductor conductor) {
 		this.origen = origen;
 		this.destino = destino;
-		this.duracion = duracion;
+		this.distancia = distancia;
 		this.vehiculo = vehiculo;
 		this.conductor = conductor;
 	}
@@ -42,14 +41,6 @@ public class Ruta  implements Serializable {
 
 	public void setDestino(Ciudades destino) {
 		this.destino = destino;
-	}
-
-	public double getDuracion() {
-		return duracion;
-	}
-
-	public void setDuracion(double duracion) {
-		this.duracion = duracion;
 	}
 
 	public double getDistancia() {
@@ -81,23 +72,23 @@ public class Ruta  implements Serializable {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Ruta ruta = (Ruta) o;
-		return Double.compare(duracion, ruta.duracion) == 0 && Double.compare(distancia, ruta.distancia) == 0 && Objects.equals(origen, ruta.origen) && Objects.equals(destino, ruta.destino) && Objects.equals(vehiculo, ruta.vehiculo) && Objects.equals(conductor, ruta.conductor);
+		return Double.compare(distancia, ruta.distancia) == 0 && origen == ruta.origen && destino == ruta.destino && Objects.equals(vehiculo, ruta.vehiculo) && Objects.equals(conductor, ruta.conductor);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(origen, destino, duracion, distancia, vehiculo, conductor);
+		return Objects.hash(origen, destino, distancia, vehiculo, conductor);
 	}
 
 	@Override
 	public String toString() {
-		return "ClasesJava.Ruta{" +
-				"origen='" + origen + '\'' +
-				", destino='" + destino + '\'' +
-				", duracion=" + duracion +
-				", distancia=" + distancia +
-				", vehiculo=" + vehiculo +
-				", conductor=" + conductor +
-				'}';
+		return
+				"Origen: " + origen +
+				"\n Destino: " + destino +
+				"\n Distancia: " + distancia + "km" +
+				"\n Vehiculo: " + vehiculo.getMarca() + ", " + vehiculo.getMatricula() +
+				"\n Conductor: " + conductor +
+				"\n------------------------------------"
+				;
 	}
 }

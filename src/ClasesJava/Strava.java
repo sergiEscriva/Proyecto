@@ -38,7 +38,8 @@ public class Strava implements Serializable {
 						"3. Eliminar Conductor\n" +
 						"4. Lista Conuctores\n" +
 						"5. Crear Ruta\n" +
-						"6. Creacion Partes");
+						"6. Creacion Partes\n" +
+						"7. Mostrar Rutas");
 
 				opcion = sc.nextInt();
 
@@ -68,6 +69,10 @@ public class Strava implements Serializable {
 						break;
 					case 6:
 						creacionPartes(sc);
+						break;
+					case 7:
+						mostrarRutas();
+						break;
 					default:
 						System.out.println("Opcion no valida");
 						opcion = 0;
@@ -227,7 +232,7 @@ public class Strava implements Serializable {
 		double km = 0;
 		boolean validKm;
 		do {
-			System.out.println("Inserte Kilometros totales");
+			System.out.print("Inserte Kilometros totales: ");
 			if (sc.hasNextDouble()) {
 				km = sc.nextDouble();
 				validKm = true;
@@ -285,16 +290,6 @@ public class Strava implements Serializable {
 		}
 	}
 
-	private static void mostrarVehiculos() {
-		if (listaVehiculos.isEmpty()) {
-			System.out.println("So existen vehiculos\n");
-			return;
-		}
-		for (Vehiculo vehiculo : listaVehiculos) {
-			System.out.println(" | " + vehiculo + " | ");
-		}
-	}
-
 	private static Conductor obtenerConductor(Scanner sc) {
 		System.out.print("Inserte el id del conductor: ");
 		String id = sc.nextLine();
@@ -311,6 +306,13 @@ public class Strava implements Serializable {
 			System.out.println("Debe haber vehiculos y conductores para crear una ruta");
 			return;
 		}
+
+		System.out.print("Seleccione conductor:");
+		Conductor conductor = obtenerConductorVinculado(sc);
+
+		System.out.println("Seleccione el vehiculo del conductor");
+		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
+
 		Ciudades[] ciudades = Ciudades.values();
 		System.out.println(ANSI_BLUE + Arrays.toString(ciudades) + ANSI_RESET + "\n" + "Escriba sin '_'");
 		System.out.println("Inserte ubicacion de origen");
@@ -319,13 +321,7 @@ public class Strava implements Serializable {
 		System.out.println("Inserte ubicacion de destino");
 		Ciudades destino = obtenerUbicacion(sc, ciudades);
 
-		double distancia = CalculadoraDistancia.calcularDistancia(origen.getLatitud(), origen.getLongitud(), destino.getLatitud(), destino.getLongitud());
-
-		System.out.print("Seleccione conductor:");
-		Conductor conductor = obtenerConductorVinculado(sc);
-
-		System.out.println("Seleccione el vehiculo del conductor");
-		Vehiculo vehiculo = obtenerVehiculoVinculado(sc, conductor);
+		double distancia = Math.round(CalculadoraDistancia.calcularDistancia(origen.getLatitud(), origen.getLongitud(), destino.getLatitud(), destino.getLongitud()));
 
 		Ruta ruta = new Ruta(origen, destino, distancia, vehiculo, conductor);
 		listaRutas.add(ruta);
@@ -471,12 +467,12 @@ public class Strava implements Serializable {
 		System.out.print("Coste total:");
 		double coste = sc.nextDouble();
 		numeroFicheros++;
-		try (PrintWriter writer = new PrintWriter("src\\CarpetasPartes\\" + conductor.getId() + "\\parte"+ numeroFicheros +".csv")) {
+		try (PrintWriter writer = new PrintWriter("src\\CarpetasPartes\\" + conductor.getId() + "\\parte" + numeroFicheros + ".csv")) {
 			writer.println("Matricula,Marca,Modelo,TipoMantenimiento,Parte,Coste");
 
 			writer.println(vehiculo.getMatricula() + ";" +
 					vehiculo.getMarca() + ";" +
-					vehiculo.getModelo() + ";"+
+					vehiculo.getModelo() + ";" +
 					tipoMantenimiento + ";" +
 					parte + ";" +
 					coste);
@@ -513,5 +509,9 @@ public class Strava implements Serializable {
 			}
 		} while (tipoMantenimientoAselecionar == null);
 		return tipoMantenimientoAselecionar;
+	}
+
+	private static void mostrarRutas(){
+		System.out.println(listaRutas);
 	}
 }
